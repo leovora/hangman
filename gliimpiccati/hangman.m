@@ -20,7 +20,7 @@ GeneraEsercizio::usage = "La funzionalit\[AGrave] Genera Esercizio prevede un ge
 esercizi. Date all\[CloseCurlyQuote]utente la possibilit\[AGrave] di generare un esercizio e/o rigenerare l\[CloseCurlyQuote]ultimo esercizio corrente, chiedendo un
 numero (Seed), ad esempio tramite finestra di input o checkbox."
 
-MostraSoluzione::usage = " La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up."
+MostraSoluzione::usage = "La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up."
 
 VerificaRisultato::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse."
 
@@ -58,14 +58,18 @@ Module[ { wordlist, pattern, wordlen, word },
 GeneraEsercizio[] (* Chiamata di funzione lasciata per le prove *)
 
 
-Seed[] :=
-Module[ {}, 
-];
-
-
- MostraSoluzione[] :=
-Module[ {}, 
-];
+(* Implementazione della funzione MostraSoluzione *)
+MostraSoluzione[soluzione_] := 
+Module[{stringa},
+	(* Concatenazione della lista di caratteri in una stringa mostrare all'utente *)
+	stringa = StringJoin[soluzione];
+	
+	(* Messaggio da mostrare all'utente attraverso un pop-up *)
+	MessageDialog[
+		Row[{"La parola da indovinare \[EGrave]: ", Style[stringa, Bold]}]
+	]
+]
+MostraSoluzione[GeneraEsercizio[]]
 
 
 VerificaRisultato[] :=
