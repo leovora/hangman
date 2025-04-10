@@ -101,9 +101,7 @@ Module[ {newState, errors = {}, score = 0},
 ];
 
 
-(* Implementazione della funzione GeneraInterfaccia *)
-GeneraInterfaccia[]:= DynamicModule[{},
-	Manipulate[]]
+
 
 
 (* Funzioni ausiliarie *)
@@ -198,10 +196,125 @@ DynamicModule[{nome = "", classifica = {}, file},
 
 
 
+GeneraInterfaccia[] := DynamicModule[
+  {
+    fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
+    gamemode = 1, (* Modalit\[AGrave] di difficolt\[AGrave]: 1 = Facile, 2 = Media, 3 = Difficile *)
+    seed = Automatic, (* Valore del seed per la generazione pseudo-casuale della parola *)
+    parola, stato, errori, score, (* Variabili per la parola da indovinare, lo stato del gioco, gli errori e il punteggio *)
+    letteraUtente = "", (* Lettera immessa dall'utente *)
+    messaggio = "", (* Messaggio da mostrare all'utente (corretto/sbagliato) *)
+    maxErrori = 6, (* Numero massimo di errori consentiti *)
+    classificaMostrata = False (* Flag per verificare se la classifica \[EGrave] gi\[AGrave] stata mostrata *)
+  },
+
+  Dynamic[
+	(* Switch per determinare quale parte dell'interfaccia mostrare in base alla fase del gioco *)
+    Switch[fase, 
+
+      "selezione", (* Fase di selezione della difficolt\[AGrave] e del seed *)
+      Column[{
+        Style["Seleziona la difficolt\[AGrave]", Bold, 16],
+        RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
+        
+        Row[{"Seed (opzionale): ", InputField[Dynamic[seed], String]}], 
+        
+        Button["Inizia partita", 
+          (
+            If[StringMatchQ[seed, NumberString], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
+            {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
+            fase = "gioco"; (* Passa alla fase di gioco *)
+            letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
+          ),
+          ImageSize -> Medium 
+        ]
+      }, Spacings -> 2], 
+
+      "gioco", (* Fase di gioco, dove l'utente interagisce con il gioco *)
+      Column[{
+        Style["Gioco dell'impiccato", Bold, 20],
+        Dynamic[Row[Riffle[If[# === "_", Style[" _ ", Gray], Style[#]] & /@ stato, " "]]], (* Visualizza lo stato attuale della parola con gli spazi vuoti per le lettere da indovinare *)
+
+        Row[{
+          "Lettera: ", 
+          InputField[Dynamic[letteraUtente], String], (* Input per la lettera che l'utente vuole provare *)
+          Button["Prova", (* Bottone per fare una prova con la lettera scelta *)
+            Module[{guess = ToLowerCase[StringTrim[letteraUtente]]}, (* Elimina gli spazi e converte la lettera in minuscolo *)
+              If[StringLength[guess] == 1 && LetterQ[guess], (* Verifica che la stringa sia una sola lettera *)
+                If[!MemberQ[Join[stato, errori], guess], (* Verifica che la lettera non sia gi\[AGrave] stata provata *)
+                  {stato, errori, score} = AggiornaStato[parola, stato, guess, score, gamemode, errori]; (* Aggiorna lo stato del gioco con la lettera scelta *)
+                  messaggio = If[MemberQ[parola, guess], "Lettera corretta!", "Lettera sbagliata!"]; (* Mostra un messaggio in base al risultato della prova *)
+                ];
+              ];
+              letteraUtente = ""; (* Reset dell'input della lettera dopo la prova *)
+            ]
+          ]
+        }],
+        
+        Row[{
+          Button["Suggerimento", 
+            {stato, errori, score} = Suggerimento[parola, stato, errori, score, gamemode] (* Fornisce un suggerimento e aggiorna stato, errori e punteggio *)
+          ],
+          Spacer[20],
+          Button["Pulisci", 
+            {stato, errori, score} = Pulisci[parola] (* Resetta lo stato del gioco con la funzione Pulisci *)
+          ],
+          Spacer[20], 
+          Button["Mostra soluzione",
+            MostraSoluzione[parola] (* Mostra la soluzione *)
+          ]
+        }],
+
+        Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}], (* Visualizza le lettere sbagliate provate dall'utente *)
+        Dynamic[Row[{"Errori: ", Length[errori], "/", maxErrori}]], (* Mostra il numero di errori *)
+        Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
+
+        Dynamic[
+          If[
+            stato === parola || Length[errori] >= maxErrori, (* Se la parola \[EGrave] indovinata o sono stati raggiunti troppi errori *)
+            (
+              If[!classificaMostrata,
+                classificaMostrata = True;
+                MostraClassificaGUI[score]; (* Mostra la classifica al termine del gioco *)
+              ];
+              Style[
+                If[stato === parola,
+                  "Hai vinto!", (* Se la parola \[EGrave] indovinata, mostra il messaggio di vittoria *)
+                  "Hai perso! La parola era: " <> StringJoin[parola] (* Altrimenti, mostra la parola corretta e il messaggio di sconfitta *)
+                ],
+                If[stato === parola, Green, Red], Bold 
+              ]
+            ),
+            ""
+          ]
+        ],
+
+        Button["Nuova partita", (* Bottone per iniziare una nuova partita *)
+          (
+            fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
+            letteraUtente = ""; messaggio = ""; (* Resetta le variabili *)
+          )
+        ]
+      }]
+    ]
+  ]
+];
+
+
 (* Si puo' giocare da qua *)
-gameMode = 2;
-{word, state, errors, score} = GeneraEsercizio[gameMode];
-word
+GeneraInterfaccia[]
+
+
+(* ::Input:: *)
+(*d*)
+
+
+(* ::Input:: *)
+(**)
+
+
+(* ::Input:: *)
+(**)
 
 
 {state, errors, score} = AggiornaStato[word, state, "a", score, gameMode, errors]
