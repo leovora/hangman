@@ -206,6 +206,25 @@ DynamicModule[{nome = "", classifica = {}, file},
 
 
 
+DisegnaImpiccato[n_] := Graphics[
+  {
+    Thick,
+    Line[{{0, 0}, {3, 0}}], (* base *)
+    Line[{{1.5, 0}, {1.5, 5}}], (* palo verticale *)
+    Line[{{1.5, 5}, {3, 5}}], (* trave orizzontale *)
+    Line[{{3, 5}, {3, 4.5}}], (* corda *)
+
+    If[n >= 1, Circle[{3, 4}, 0.5], Nothing], (* testa *)
+    If[n >= 2, Line[{{3, 3.5}, {3, 2.5}}], Nothing], (* corpo *)
+    If[n >= 3, Line[{{3, 3.3}, {2.7, 3}}], Nothing], (* braccio sinistro *)
+    If[n >= 4, Line[{{3, 3.3}, {3.3, 3}}], Nothing], (* braccio destro *)
+    If[n >= 5, Line[{{3, 2.5}, {2.7, 2}}], Nothing], (* gamba sinistra *)
+    If[n >= 6, Line[{{3, 2.5}, {3.3, 2}}], Nothing] (* gamba destra *)
+  },
+  PlotRange -> {{0, 4}, {0, 6}}, ImageSize -> 200
+]
+
+
 GeneraInterfaccia[] := DynamicModule[
   {
     fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
@@ -224,7 +243,7 @@ GeneraInterfaccia[] := DynamicModule[
 
       "selezione", (* Fase di selezione della difficolt\[AGrave] e del seed *)
       Column[{
-        Style["Seleziona la difficolt\[AGrave]", Bold, 16],
+        Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16],
         RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
         
         Row[{"Seed (opzionale): ", InputField[Dynamic[seed], String]}], 
@@ -262,15 +281,15 @@ GeneraInterfaccia[] := DynamicModule[
         }],
         
         Row[{
-          Button["Suggerimento", 
+          Button["\|01f4a1Suggerimento", 
             {stato, errori, score} = Suggerimento[parola, stato, errori, score, gamemode] (* Fornisce un suggerimento e aggiorna stato, errori e punteggio *)
           ],
           Spacer[20],
-          Button["Pulisci", 
+          Button["\|01f9fdPulisci", 
             {stato, errori, score} = Pulisci[parola] (* Resetta lo stato del gioco con la funzione Pulisci *)
           ],
           Spacer[20], 
-          Button["Mostra soluzione",
+          Button["\|01f50eMostra soluzione",
             MostraSoluzione[parola] (* Mostra la soluzione *)
           ]
         }],
@@ -278,6 +297,7 @@ GeneraInterfaccia[] := DynamicModule[
         Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}]], (* Visualizza le lettere sbagliate provate dall'utente *)
         Dynamic[Row[{"Errori: ", Length[errori], "/", maxErrori}]], (* Mostra il numero di errori *)
         Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
+        Dynamic[DisegnaImpiccato[Length[errori]]]
 
         Dynamic[
           If[
@@ -299,7 +319,7 @@ GeneraInterfaccia[] := DynamicModule[
           ]
         ],
 
-        Button["Nuova partita", (* Bottone per iniziare una nuova partita *)
+        Button["\|01f504Nuova partita", (* Bottone per iniziare una nuova partita *)
           (
             fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
             letteraUtente = ""; messaggio = ""; (* Resetta le variabili *)
@@ -309,6 +329,7 @@ GeneraInterfaccia[] := DynamicModule[
     ]
   ]
 ];
+
 
 
 (* Si puo' giocare da qua *)
