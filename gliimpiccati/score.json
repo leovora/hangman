@@ -1,11 +1,19 @@
 [
 	{
+		"nome":"aaa",
+		"punteggio":160
+	},
+	{
 		"nome":"lll",
 		"punteggio":130
 	},
 	{
 		"nome":"leo",
 		"punteggio":40
+	},
+	{
+		"nome":"cc",
+		"punteggio":20
 	},
 	{
 		"nome":"aa",
@@ -40,7 +48,7 @@
 		"punteggio":10
 	},
 	{
-		"nome":"aaa",
-		"punteggio":160
+		"nome":"a",
+		"punteggio":100
 	}
 ]

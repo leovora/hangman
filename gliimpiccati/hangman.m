@@ -22,7 +22,7 @@ numero (Seed), ad esempio tramite finestra di input o checkbox."
 
 MostraSoluzione::usage = "La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up."
 
-VerificaRisultato::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse."
+Suggerimento::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse."
 
 Pulisci::usage = "La funzionalit\[AGrave] Pulisci riporta l\[CloseCurlyQuote]interfaccia allo stato iniziale, ripulendo anche eventuali celle create (ad
 esempio, da Mostra Soluzione e/o Verfica Risultato) durante l\[CloseCurlyQuote]uso della interfaccia stessa"
@@ -74,18 +74,21 @@ Module[{stringa},
 		]
 	]
 ];
-{ word, state, errors } = GeneraEsercizio[];
-MostraSoluzione[word]
 
 
+(* Implementazione della funzione suggerimento *)
 Suggerimento[word_List, state_List, errors_List, score_Integer, gameMode_Integer] :=
 Module[ {suggerimento, lettereMancanti, newScore},
+	(* Recupero delle lettere mancanti tramite una sottrazione insiemistica *)
 	lettereMancanti = DeleteDuplicates[Complement[word, state]];
 	
+	(* Scelta casuale di una tra le lettere mancanti *)
 	suggerimento = RandomChoice[lettereMancanti];
 	
+	(* Sottrazione del punteggio per aver usato un suggerimento *)
 	newScore = score - 5 * gameMode;
 	
+	(* Simulazione della scelta di una lettera con la lettera suggerita, chiamata con gameMode=0 per evitare che incrementi il punteggio *)
 	AggiornaStato[word, state, suggerimento, newScore, 0, errors]
 ];
 
@@ -130,6 +133,7 @@ Module[{newState, newErrors, newScore},
 		newScore = score
 	];
 	
+	(* Ritorna lo stato, gli errori e lo score aggiornati *)
 	{newState, newErrors, newScore}
 ];
 
@@ -152,12 +156,14 @@ Module[{record, datiEsistenti = {}, nuovoContenuto},
 (* Funzione per caricare e ordinare la classifica *)
 RecuperaClassifica[file_: "score.json"] := 
 Module [{classifica},
-	If[FileExistsQ[file],
-	classifica = Import[file, "JSON"];
-	If[!ListQ[classifica], classifica = {}],
-	classifica = {}
+	If[FileExistsQ[file], (* Controllo l'esistenza del file *)
+	classifica = Import[file, "JSON"]; (* Se il file esiste carica i suoi dati *)
+	If[!ListQ[classifica], classifica = {}], (* Se non ci sono dati inizializza classifica come lista vuota *)
+	classifica = {} (* Se non esite il file inizializza classifica come lista vuota *)
 	];
-	classifica = Reverse@SortBy[classifica, #[[2,2]] &]
+	
+	(* Ritorna la classifica ordinata in maniera decrescente in base al punteggio *)
+	classifica = Reverse@SortBy[classifica, #[[2,2]] &] (* Usa l'operatore di partizione per accedere al valore del punteggio *)
 ];
 
 MostraClassificaGUI[score_Integer] := 
@@ -166,22 +172,26 @@ DynamicModule[{nome = "", classifica = {}, file},
 	SetDirectory[NotebookDirectory[]];
 	file = "score.json";
 	classifica = RecuperaClassifica[];
+	
+	(* Creazione del pop-up *)
 	CreateDialog[
 		Framed[
 			Column[{
 				Style["Classifica", Bold, 16],
-	    
+				(* Creazione della tablella dei punteggi *)
 				Dynamic@Grid[
 				Prepend[
-					MapIndexed[With[{assoc = Association[#1]}, {#2[[1]], assoc["nome"], assoc["punteggio"]}] &, classifica],
+					(* Con MapIndexed applico l'operatore di partizione a ogni elemento di classifica accedendo a nome e punteggio *)
+					MapIndexed[{#2[[1]], #[[1,2]], #[[2,2]]} &, classifica],
 					{"#", "Nome", "Punteggio"}
 					],
 					Frame -> All,
 					Alignment -> Center
 				],
-				
+			(* Campo di inserimento del nome per il salvataggio nella classifica *)
 			"Inserisci il tuo nome:",
 			InputField[Dynamic[nome], String, FieldSize -> 20],
+			(* Bottone per salvare il punteggio della partita e aggiornare la classifica *)
 			Button["Salva Punteggio", SalvaRecord[nome, score]; classifica = RecuperaClassifica[];, Enabled -> Dynamic[StringLength[nome] > 0]]
 			}, Spacings -> 1.5],
 			
@@ -265,7 +275,7 @@ GeneraInterfaccia[] := DynamicModule[
           ]
         }],
 
-        Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}], (* Visualizza le lettere sbagliate provate dall'utente *)
+        Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}]], (* Visualizza le lettere sbagliate provate dall'utente *)
         Dynamic[Row[{"Errori: ", Length[errori], "/", maxErrori}]], (* Mostra il numero di errori *)
         Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
 
@@ -303,18 +313,6 @@ GeneraInterfaccia[] := DynamicModule[
 
 (* Si puo' giocare da qua *)
 GeneraInterfaccia[]
-
-
-(* ::Input:: *)
-(*d*)
-
-
-(* ::Input:: *)
-(**)
-
-
-(* ::Input:: *)
-(**)
 
 
 {state, errors, score} = AggiornaStato[word, state, "a", score, gameMode, errors]
