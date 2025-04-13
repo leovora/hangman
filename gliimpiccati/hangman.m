@@ -262,6 +262,7 @@ GeneraInterfaccia[] := DynamicModule[
       "gioco", (* Fase di gioco, dove l'utente interagisce con il gioco *)
       Column[{
         Style["Gioco dell'impiccato", Bold, 20],
+        Dynamic[Row[{"Punteggio: ", Style[score, Blue, Bold]}]], (* Visualizza il punteggio *)
         Dynamic[Row[Riffle[If[# === "_", Style[" _ ", Gray], Style[#]] & /@ stato, " "]]], (* Visualizza lo stato attuale della parola con gli spazi vuoti per le lettere da indovinare *)
 
         Row[{
