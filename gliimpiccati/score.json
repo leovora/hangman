@@ -28,6 +28,10 @@
 		"punteggio":40
 	},
 	{
+		"nome":"adsad",
+		"punteggio":40
+	},
+	{
 		"nome":"cc",
 		"punteggio":20
 	},
@@ -64,7 +68,7 @@
 		"punteggio":10
 	},
 	{
-		"nome":"adsad",
-		"punteggio":40
+		"nome":"ggggg",
+		"punteggio":-20
 	}
 ]
