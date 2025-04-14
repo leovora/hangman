@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      6523,        196]
-NotebookOptionsPosition[      4445,        152]
-NotebookOutlinePosition[      4851,        168]
-CellTagsIndexPosition[      4808,        165]
+NotebookDataLength[     12711,        329]
+NotebookOptionsPosition[     10319,        280]
+NotebookOutlinePosition[     10720,        296]
+CellTagsIndexPosition[     10677,        293]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -61,8 +61,8 @@ A/B/C) \
  CellFrame->{{0, 0}, {0, 0}},
  CellChangeTimes->{
   3.952749719653925*^9, {3.952950566622942*^9, 3.952950567307434*^9}, {
-   3.9529511998054295`*^9, 
-   3.9529512009655113`*^9}},ExpressionUUID->"da94ac42-1c37-8e4f-a35d-\
+   3.9529511998054295`*^9, 3.9529512009655113`*^9}, {3.9536188437918987`*^9, 
+   3.953618844985879*^9}},ExpressionUUID->"da94ac42-1c37-8e4f-a35d-\
 cfab77b35df7"],
 
 Cell[CellGroupData[{
@@ -86,9 +86,8 @@ Cell["Introduzione", "Section",
 62802ce52b08"],
 
 Cell[BoxData["\[IndentingNewLine]"], "Input",
- CellChangeTimes->{
-  3.952951607914589*^9},ExpressionUUID->"49bc2f04-ebee-1a41-b72f-\
-d5d90c3c3bcc"]
+ CellChangeTimes->{3.952951607914589*^9},
+ CellLabel->"",ExpressionUUID->"49bc2f04-ebee-1a41-b72f-d5d90c3c3bcc"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -98,10 +97,139 @@ Cell["Gioco", "Section",
   3.952951452633795*^9}},ExpressionUUID->"eaebc9a6-c66b-9c4d-97a5-\
 af5c8a4e5c8c"],
 
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"SetDirectory", "[", 
+  RowBox[{"NotebookDirectory", "[", "]"}], "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Get", "[", "\"\<hangman.m\>\"", "]"}], "\[IndentingNewLine]", 
+ RowBox[{"GeneraInterfaccia", "[", "]"}]}], "Input",
+ CellChangeTimes->{{3.953618500502062*^9, 3.9536185297464542`*^9}, {
+  3.9536185829822283`*^9, 3.9536186051137543`*^9}, {3.953618635659494*^9, 
+  3.953618689719755*^9}, {3.953618826876548*^9, 3.9536188418563967`*^9}},
+ CellLabel->"In[16]:=",ExpressionUUID->"b2424623-4896-47c7-9846-d4f7d8bcb40d"],
+
+Cell[BoxData["\<\"/Users/leonardovorabbi/Desktop/hangman/gliimpiccati\"\>"], \
+"Output",
+ CellChangeTimes->{3.953618504977581*^9, 3.9536187091385927`*^9, 
+  3.953618797146647*^9},
+ CellLabel->"Out[16]=",ExpressionUUID->"d33e12bc-0ce6-4cb4-80f1-3d93dd01e1c6"],
+
+Cell[BoxData[
+ DynamicModuleBox[{HangmanGame`Private`fase$$ = "gioco", 
+  HangmanGame`Private`gamemode$$ = 3, HangmanGame`Private`seed$$ = Automatic, 
+  HangmanGame`Private`parola$$ = {
+  "a", "l", "l", "o", "c", "a", "r", "l", "o"}, 
+  HangmanGame`Private`stato$$ = {"_", "_", "_", "_", "_", "_", "_", "_", "_"},
+   HangmanGame`Private`errori$$ = {}, HangmanGame`Private`score$$ = 0, 
+  HangmanGame`Private`letteraUtente$$ = "", HangmanGame`Private`messaggio$$ = 
+  "", HangmanGame`Private`maxErrori$$ = 6, 
+  HangmanGame`Private`classificaMostrata$$ = False}, 
+  DynamicBox[ToBoxes[
+    Switch[HangmanGame`Private`fase$$, "selezione", 
+     Column[{
+       Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16], 
+       RadioButtonBar[
+        Dynamic[HangmanGame`Private`gamemode$$], {
+        1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}], 
+       Row[{"Seed (opzionale): ", 
+         InputField[
+          Dynamic[HangmanGame`Private`seed$$], String]}], 
+       Button["Inizia partita", If[
+          StringMatchQ[HangmanGame`Private`seed$$, NumberString], 
+          HangmanGame`Private`seed$$ = 
+          ToExpression[HangmanGame`Private`seed$$], 
+          HangmanGame`Private`seed$$ = Automatic]; {
+          HangmanGame`Private`parola$$, HangmanGame`Private`stato$$, 
+           HangmanGame`Private`errori$$, HangmanGame`Private`score$$} = 
+         HangmanGame`GeneraEsercizio[
+          HangmanGame`Private`gamemode$$, HangmanGame`Private`seed$$]; 
+        HangmanGame`Private`fase$$ = "gioco"; 
+        HangmanGame`Private`letteraUtente$$ = ""; 
+        HangmanGame`Private`messaggio$$ = ""; 
+        HangmanGame`Private`classificaMostrata$$ = False; Null, ImageSize -> 
+        Medium]}, Spacings -> 2], "gioco", 
+     Column[{
+       Style["Gioco dell'impiccato", Bold, 20], 
+       Dynamic[
+        Row[{"Punteggio: ", 
+          Style[HangmanGame`Private`score$$, Blue, Bold]}]], 
+       Dynamic[
+        Row[
+         Riffle[
+          Map[If[# === "_", 
+            Style[" _ ", Gray], 
+            Style[#]]& , HangmanGame`Private`stato$$], " "]]], 
+       Row[{
+         Button[
+         "\|01f4a1Suggerimento", {
+           HangmanGame`Private`stato$$, HangmanGame`Private`errori$$, 
+            HangmanGame`Private`score$$} = 
+          HangmanGame`Suggerimento[
+           HangmanGame`Private`parola$$, HangmanGame`Private`stato$$, 
+            HangmanGame`Private`errori$$, HangmanGame`Private`score$$, 
+            HangmanGame`Private`gamemode$$]], 
+         Spacer[20], 
+         Button[
+         "\|01f9fdPulisci", {
+           HangmanGame`Private`stato$$, HangmanGame`Private`errori$$, 
+            HangmanGame`Private`score$$} = 
+          HangmanGame`Pulisci[HangmanGame`Private`parola$$]], 
+         Spacer[20], 
+         Button["\|01f50eMostra soluzione", 
+          HangmanGame`MostraSoluzione[HangmanGame`Private`parola$$]]}], 
+       Dynamic[
+        Row[{"Lettere sbagliate: ", 
+          StringJoin[
+           Riffle[HangmanGame`Private`errori$$, ", "]]}]], 
+       Dynamic[
+        Row[{"Errori: ", 
+          Length[HangmanGame`Private`errori$$], "/", 
+          HangmanGame`Private`maxErrori$$}]], 
+       Dynamic[
+        Style[HangmanGame`Private`messaggio$$, Blue]], 
+       Dynamic[
+        HangmanGame`Private`DisegnaImpiccato[
+         Length[HangmanGame`Private`errori$$]]], 
+       Column[
+        Map[HangmanGame`Private`CreaRiga[{
+           Part[#, 1], 
+           Part[#, 2], HangmanGame`Private`parola$$, 
+           HangmanGame`Private`stato$$, HangmanGame`Private`score$$, 
+           HangmanGame`Private`gamemode$$, HangmanGame`Private`errori$$}]& , 
+         HangmanGame`Private`righeTastiera], Spacings -> 1], 
+       Dynamic[
+        If[
+         Or[
+         HangmanGame`Private`stato$$ === HangmanGame`Private`parola$$, 
+          Length[HangmanGame`Private`errori$$] >= 
+          HangmanGame`Private`maxErrori$$], If[
+           Not[HangmanGame`Private`classificaMostrata$$], 
+           HangmanGame`Private`classificaMostrata$$ = True; 
+           HangmanGame`Private`MostraClassificaGUI[
+            HangmanGame`Private`score$$]; Null]; Style[
+           If[
+           HangmanGame`Private`stato$$ === HangmanGame`Private`parola$$, 
+            "Hai vinto!", "Hai perso! La parola era: " <> 
+            StringJoin[HangmanGame`Private`parola$$]], 
+           If[
+           HangmanGame`Private`stato$$ === HangmanGame`Private`parola$$, 
+            Green, Red], Bold], ""]], 
+       Button[
+       "\|01f504Nuova partita", HangmanGame`Private`fase$$ = "selezione"; 
+        HangmanGame`Private`letteraUtente$$ = ""; 
+        HangmanGame`Private`messaggio$$ = ""; Null]}]], StandardForm],
+   ImageSizeCache->{
+    818.4840000000002, {317.85753320312494`, 323.58946679687494`}}],
+  DynamicModuleValues:>{}]], "Output",
+ CellChangeTimes->{3.953618504977581*^9, 3.9536187091385927`*^9, 
+  3.953618797243284*^9},
+ CellLabel->"Out[18]=",ExpressionUUID->"8500d54d-e833-4df7-aa69-069c301aad62"]
+}, Open  ]],
+
 Cell[BoxData[""], "Input",
- CellChangeTimes->{{3.9529515925503464`*^9, 
-  3.952951593525772*^9}},ExpressionUUID->"ef1e26f2-3d2e-da4c-b9f1-\
-24f1de8d921a"]
+ CellChangeTimes->{{3.9529515925503464`*^9, 3.952951593525772*^9}},
+ CellLabel->"",ExpressionUUID->"ef1e26f2-3d2e-da4c-b9f1-24f1de8d921a"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -150,9 +278,9 @@ c6cc50b566c4"]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{718.5, 825},
+WindowSize->{Full, Full},
 WindowMargins->{{Automatic, -5.25}, {Automatic, 0}},
-FrontEndVersion->"14.2 for Microsoft Windows (64-bit) (December 26, 2024)",
+FrontEndVersion->"14.2 for Mac OS X ARM (64-bit) (December 26, 2024)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"dc2d8fa6-0bef-fd47-afe3-890dcc491ae8"
 ]
@@ -172,30 +300,35 @@ Cell[576, 22, 159, 3, 96, "Title",ExpressionUUID->"c0d10265-0122-ef49-b205-3504c
 Cell[738, 27, 280, 8, 83, "Subtitle",ExpressionUUID->"2af73279-7200-9f49-bb81-b0d9e79e303c"],
 Cell[1021, 37, 348, 7, 33, "Text",ExpressionUUID->"5fa28044-5d8f-f944-b66c-3081990c14b9"],
 Cell[1372, 46, 236, 7, 55, "Text",ExpressionUUID->"377b9d67-0394-0141-9385-837b73eeec74"],
-Cell[1611, 55, 391, 10, 77, "Text",ExpressionUUID->"da94ac42-1c37-8e4f-a35d-cfab77b35df7"],
+Cell[1611, 55, 439, 10, 55, "Text",ExpressionUUID->"da94ac42-1c37-8e4f-a35d-cfab77b35df7"],
 Cell[CellGroupData[{
-Cell[2027, 69, 155, 3, 66, "Section",ExpressionUUID->"61ab9a5d-fe27-8d49-96df-04e596fce78c"],
-Cell[2185, 74, 175, 3, 33, "Text",ExpressionUUID->"935f0f68-a392-ab45-8fcf-45c8654d8de8"]
+Cell[2075, 69, 155, 3, 66, "Section",ExpressionUUID->"61ab9a5d-fe27-8d49-96df-04e596fce78c"],
+Cell[2233, 74, 175, 3, 33, "Text",ExpressionUUID->"935f0f68-a392-ab45-8fcf-45c8654d8de8"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2397, 82, 180, 3, 66, "Section",ExpressionUUID->"4be9a7d2-9fc1-f545-90af-62802ce52b08"],
-Cell[2580, 87, 147, 3, 47, "Input",ExpressionUUID->"49bc2f04-ebee-1a41-b72f-d5d90c3c3bcc"]
+Cell[2445, 82, 180, 3, 66, "Section",ExpressionUUID->"4be9a7d2-9fc1-f545-90af-62802ce52b08"],
+Cell[2628, 87, 158, 2, 49, "Input",ExpressionUUID->"49bc2f04-ebee-1a41-b72f-d5d90c3c3bcc"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2764, 95, 152, 3, 66, "Section",ExpressionUUID->"eaebc9a6-c66b-9c4d-97a5-af5c8a4e5c8c"],
-Cell[2919, 100, 154, 3, 28, "Input",ExpressionUUID->"ef1e26f2-3d2e-da4c-b9f1-24f1de8d921a"]
+Cell[2823, 94, 152, 3, 66, "Section",ExpressionUUID->"eaebc9a6-c66b-9c4d-97a5-af5c8a4e5c8c"],
+Cell[CellGroupData[{
+Cell[3000, 101, 542, 8, 70, "Input",ExpressionUUID->"b2424623-4896-47c7-9846-d4f7d8bcb40d"],
+Cell[3545, 111, 258, 4, 33, "Output",ExpressionUUID->"d33e12bc-0ce6-4cb4-80f1-3d93dd01e1c6"],
+Cell[3806, 117, 4961, 109, 658, "Output",ExpressionUUID->"8500d54d-e833-4df7-aa69-069c301aad62"]
+}, Open  ]],
+Cell[8782, 229, 165, 2, 29, "Input",ExpressionUUID->"ef1e26f2-3d2e-da4c-b9f1-24f1de8d921a"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3110, 108, 162, 3, 66, "Section",ExpressionUUID->"139cd4af-51d0-8949-86b2-d9dfe22c3d15"],
-Cell[3275, 113, 255, 5, 33, "Text",ExpressionUUID->"e3081633-21b3-2e48-84e5-0493cc5c6747"]
+Cell[8984, 236, 162, 3, 66, "Section",ExpressionUUID->"139cd4af-51d0-8949-86b2-d9dfe22c3d15"],
+Cell[9149, 241, 255, 5, 33, "Text",ExpressionUUID->"e3081633-21b3-2e48-84e5-0493cc5c6747"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3567, 123, 172, 3, 66, "Section",ExpressionUUID->"8f2a2eb0-1a5c-1045-8f47-f6c04a2aab53"],
-Cell[3742, 128, 212, 4, 33, "Text",ExpressionUUID->"54d97db6-28ae-ac41-87f8-26d4dd6bd54d"]
+Cell[9441, 251, 172, 3, 66, "Section",ExpressionUUID->"8f2a2eb0-1a5c-1045-8f47-f6c04a2aab53"],
+Cell[9616, 256, 212, 4, 33, "Text",ExpressionUUID->"54d97db6-28ae-ac41-87f8-26d4dd6bd54d"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3991, 137, 173, 3, 66, "Section",ExpressionUUID->"85b7f2be-3b61-e74a-9f5b-cd1f84aa28e9"],
-Cell[4167, 142, 250, 6, 33, "Text",ExpressionUUID->"b2df00fc-b139-354b-b2bb-c6cc50b566c4"]
+Cell[9865, 265, 173, 3, 66, "Section",ExpressionUUID->"85b7f2be-3b61-e74a-9f5b-cd1f84aa28e9"],
+Cell[10041, 270, 250, 6, 33, "Text",ExpressionUUID->"b2df00fc-b139-354b-b2bb-c6cc50b566c4"]
 }, Open  ]]
 }, Open  ]]
 }
