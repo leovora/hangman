@@ -8,7 +8,23 @@
 		"punteggio":130
 	},
 	{
+		"nome":"a",
+		"punteggio":100
+	},
+	{
+		"nome":"sas",
+		"punteggio":40
+	},
+	{
 		"nome":"leo",
+		"punteggio":40
+	},
+	{
+		"nome":"adsad",
+		"punteggio":40
+	},
+	{
+		"nome":"adsad",
 		"punteggio":40
 	},
 	{
@@ -48,7 +64,7 @@
 		"punteggio":10
 	},
 	{
-		"nome":"a",
-		"punteggio":100
+		"nome":"adsad",
+		"punteggio":40
 	}
 ]

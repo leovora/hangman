@@ -14,30 +14,30 @@
 (* :Requirements: *)
 (* :Warning: DOCUMENTATE TUTTO il codice *)
 
-BeginPackage["HangmanGame`"]
+BeginPackage["HangmanGame`"];
 
 GeneraEsercizio::usage = "La funzionalit\[AGrave] Genera Esercizio prevede un generatore casuale di un numero potenzialmente infinito di
 esercizi. Date all\[CloseCurlyQuote]utente la possibilit\[AGrave] di generare un esercizio e/o rigenerare l\[CloseCurlyQuote]ultimo esercizio corrente, chiedendo un
-numero (Seed), ad esempio tramite finestra di input o checkbox."
+numero (Seed), ad esempio tramite finestra di input o checkbox.";
 
-MostraSoluzione::usage = "La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up."
+MostraSoluzione::usage = "La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up.";
 
-Suggerimento::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse."
+Suggerimento::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse.";
 
 Pulisci::usage = "La funzionalit\[AGrave] Pulisci riporta l\[CloseCurlyQuote]interfaccia allo stato iniziale, ripulendo anche eventuali celle create (ad
-esempio, da Mostra Soluzione e/o Verfica Risultato) durante l\[CloseCurlyQuote]uso della interfaccia stessa"
+esempio, da Mostra Soluzione e/o Verfica Risultato) durante l\[CloseCurlyQuote]uso della interfaccia stessa";
 
 GeneraInterfaccia::usage = "GeneraInterfaccia[]
 	Funzione che permette di generare un'interfaccia interattiva e dinamica, la quale richiama
-	le altre funzionalita' del gioco."
+	le altre funzionalita' del gioco.";
 
 
-Begin["`Private`"]
+Begin["`Private`"];
 
 
 (* Implementazione della funzione GeneraEsericizio *)
 GeneraEsercizio[ gamemode_:1, seed_:Automatic ] :=
-Module[ { wordlist, pattern, wordlen, word, state, errors={}, score=0 }, 
+Module[ { wordlist, pattern, wordlen, word, stato, errors={}, score=0 }, 
 	(* Imposta la lunghezza delle possibili parole in base alla difficolta' selezionata *)
 	If[ gamemode === 1, wordlen = {1,5} ];
 	If[ gamemode === 2, wordlen = {6,8} ];
@@ -53,10 +53,10 @@ Module[ { wordlist, pattern, wordlen, word, state, errors={}, score=0 },
 	word = Characters[RandomChoice[wordlist]];
 	
 	(* Inizializzazione dello stato *)
-	state = InizializzaStato[word];
+	stato = InizializzaStato[word];
 	
 	(* Ritorno della parola selezionata come lista di caratteri, lo stato iniziale e una lista vuota di errori *)
-	{word, state, errors, score}
+	{word, stato, errors, score}
 ];
 
 
@@ -77,10 +77,10 @@ Module[{stringa},
 
 
 (* Implementazione della funzione suggerimento *)
-Suggerimento[word_List, state_List, errors_List, score_Integer, gameMode_Integer] :=
+Suggerimento[word_List, stato_List, errors_List, score_Integer, gameMode_Integer] :=
 Module[ {suggerimento, lettereMancanti, newScore},
 	(* Recupero delle lettere mancanti tramite una sottrazione insiemistica *)
-	lettereMancanti = DeleteDuplicates[Complement[word, state]];
+	lettereMancanti = DeleteDuplicates[Complement[word, stato]];
 	
 	(* Scelta casuale di una tra le lettere mancanti *)
 	suggerimento = RandomChoice[lettereMancanti];
@@ -89,22 +89,19 @@ Module[ {suggerimento, lettereMancanti, newScore},
 	newScore = score - 5 * gameMode;
 	
 	(* Simulazione della scelta di una lettera con la lettera suggerita, chiamata con gameMode=0 per evitare che incrementi il punteggio *)
-	AggiornaStato[word, state, suggerimento, newScore, 0, errors]
+	AggiornaStato[word, stato, suggerimento, newScore, 0, errors]
 ];
 
 
 (* Implementazione della funzione Pulisci *)
-Pulisci[state_List] :=
+Pulisci[stato_List] :=
 Module[ {newState, errors = {}, score = 0},
 	(* Reinizializza lo stato *)
-	newState = InizializzaStato[state];
+	newState = InizializzaStato[stato];
 	
 	(* Ritorna il nuovo stato e la lista vuota degli errori *)
 	{newState, errors, score} 
 ];
-
-
-
 
 
 (* Funzioni ausiliarie *)
@@ -225,6 +222,35 @@ DisegnaImpiccato[n_] := Graphics[
 ]
 
 
+righeTastiera = {
+  {0, {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"}},   
+  {1, {"A", "S", "D", "F", "G", "H", "J", "K", "L"}},        
+  {2, {"Z", "X", "C", "V", "B", "N", "M"}}              
+};
+
+(* Funzione per creare una singola riga di bottoni *)
+CreaRiga[{offset_, lettere_, parola_, stato_, score_, gamemode_, errori_, messaggio_:""}] := Row[
+  Join[
+    {Spacer[offset*25]}, 
+    Table[
+      With[{l = lettera}, (* Blocca il valore della lettera per ogni bottone, cos\[IGrave] non viene sovrascritto *)
+        Button[
+          l, 
+		Module[{guess = ToLowerCase[StringTrim[l]]}, (* Elimina gli spazi e converte la lettera in minuscolo *)
+			{stato, errori, score} = AggiornaStato[parola, stato, guess, score, gamemode, errori]; (* Aggiorna lo stato del gioco con la lettera scelta *)
+			messaggio = If[MemberQ[parola, guess], "Lettera corretta!", "Lettera sbagliata!"]; (* Mostra un messaggio in base al risultato della prova *)
+		], 
+          ImageSize -> {40, 40} 
+        ]
+      ],
+      {lettera, lettere} (* Itera sulle lettere della riga *)
+    ]
+  ],
+  Spacer[5] 
+]
+?CreaRiga
+
+
 GeneraInterfaccia[] := DynamicModule[
   {
     fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
@@ -264,22 +290,6 @@ GeneraInterfaccia[] := DynamicModule[
         Style["Gioco dell'impiccato", Bold, 20],
         Dynamic[Row[{"Punteggio: ", Style[score, Blue, Bold]}]], (* Visualizza il punteggio *)
         Dynamic[Row[Riffle[If[# === "_", Style[" _ ", Gray], Style[#]] & /@ stato, " "]]], (* Visualizza lo stato attuale della parola con gli spazi vuoti per le lettere da indovinare *)
-
-        Row[{
-          "Lettera: ", 
-          InputField[Dynamic[letteraUtente], String], (* Input per la lettera che l'utente vuole provare *)
-          Button["Prova", (* Bottone per fare una prova con la lettera scelta *)
-            Module[{guess = ToLowerCase[StringTrim[letteraUtente]]}, (* Elimina gli spazi e converte la lettera in minuscolo *)
-              If[StringLength[guess] == 1 && LetterQ[guess], (* Verifica che la stringa sia una sola lettera *)
-                If[!MemberQ[Join[stato, errori], guess], (* Verifica che la lettera non sia gi\[AGrave] stata provata *)
-                  {stato, errori, score} = AggiornaStato[parola, stato, guess, score, gamemode, errori]; (* Aggiorna lo stato del gioco con la lettera scelta *)
-                  messaggio = If[MemberQ[parola, guess], "Lettera corretta!", "Lettera sbagliata!"]; (* Mostra un messaggio in base al risultato della prova *)
-                ];
-              ];
-              letteraUtente = ""; (* Reset dell'input della lettera dopo la prova *)
-            ]
-          ]
-        }],
         
         Row[{
           Button["\|01f4a1Suggerimento", 
@@ -298,8 +308,13 @@ GeneraInterfaccia[] := DynamicModule[
         Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}]], (* Visualizza le lettere sbagliate provate dall'utente *)
         Dynamic[Row[{"Errori: ", Length[errori], "/", maxErrori}]], (* Mostra il numero di errori *)
         Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
-        Dynamic[DisegnaImpiccato[Length[errori]]]
-
+        Dynamic[DisegnaImpiccato[Length[errori]]],
+		(* Mostra l'intera tastiera come colonna di righe *)
+		
+		Column[
+			Map[CreaRiga[{#[[1]], #[[2]], parola, stato, score, gamemode, errori}] &, righeTastiera], (* Applica la funzione creaRiga a ciascuna riga *)
+			Spacings -> 1 
+		],
         Dynamic[
           If[
             stato === parola || Length[errori] >= maxErrori, (* Se la parola \[EGrave] indovinata o sono stati raggiunti troppi errori *)
@@ -337,10 +352,21 @@ GeneraInterfaccia[] := DynamicModule[
 GeneraInterfaccia[]
 
 
-{state, errors, score} = AggiornaStato[word, state, "a", score, gameMode, errors]
+{stato, errors, score} = AggiornaStato[word, stato, "a", score, gameMode, errors]
 
 
-{state, errors, score} = Suggerimento[word, state, errors, score, gameMode]
+(* ::Input:: *)
+(*AggiornaStato[word,stato,"a",score,gameMode,errors]*)
+
+
+{stato, errors, score} = Suggerimento[word, stato, errors, score, gameMode]
+
+
+(* ::Input:: *)
+(*Suggerimento[word,stato,errors,score,gameMode]*)
+
+
+
 
 
 MostraClassificaGUI[score]
