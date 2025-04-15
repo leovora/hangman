@@ -202,7 +202,6 @@ DynamicModule[{nome = "", classifica = {}, file},
 ];
 
 
-
 DisegnaImpiccato[n_] := Graphics[
   {
     Thick,
@@ -222,40 +221,19 @@ DisegnaImpiccato[n_] := Graphics[
 ]
 
 
+(* righe della tastiera con relativo offset *)
 righeTastiera = {
   {0, {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"}},   
   {1, {"A", "S", "D", "F", "G", "H", "J", "K", "L"}},        
   {2, {"Z", "X", "C", "V", "B", "N", "M"}}              
 };
 
-(* Funzione per creare una singola riga di bottoni *)
-CreaRiga[{offset_, lettere_, parola_, stato_, score_, gamemode_, errori_, messaggio_:""}] := Row[
-  Join[
-    {Spacer[offset*25]}, 
-    Table[
-      With[{l = lettera}, (* Blocca il valore della lettera per ogni bottone, cos\[IGrave] non viene sovrascritto *)
-        Button[
-          l, 
-		Module[{guess = ToLowerCase[StringTrim[l]]}, (* Elimina gli spazi e converte la lettera in minuscolo *)
-			{stato, errori, score} = AggiornaStato[parola, stato, guess, score, gamemode, errori]; (* Aggiorna lo stato del gioco con la lettera scelta *)
-			messaggio = If[MemberQ[parola, guess], "Lettera corretta!", "Lettera sbagliata!"]; (* Mostra un messaggio in base al risultato della prova *)
-		], 
-          ImageSize -> {40, 40} 
-        ]
-      ],
-      {lettera, lettere} (* Itera sulle lettere della riga *)
-    ]
-  ],
-  Spacer[5] 
-]
-?CreaRiga
-
 
 GeneraInterfaccia[] := DynamicModule[
   {
+    seed, (* Valore del seed per la generazione pseudo-casuale della parola *)
     fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
     gamemode = 1, (* Modalit\[AGrave] di difficolt\[AGrave]: 1 = Facile, 2 = Media, 3 = Difficile *)
-    seed = Automatic, (* Valore del seed per la generazione pseudo-casuale della parola *)
     parola, stato, errori, score, (* Variabili per la parola da indovinare, lo stato del gioco, gli errori e il punteggio *)
     letteraUtente = "", (* Lettera immessa dall'utente *)
     messaggio = "", (* Messaggio da mostrare all'utente (corretto/sbagliato) *)
@@ -272,11 +250,11 @@ GeneraInterfaccia[] := DynamicModule[
         Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16],
         RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
         
-        Row[{"Seed (opzionale): ", InputField[Dynamic[seed], String]}], 
+        Row[{"Seed (opzionale): ", InputField[Dynamic[seed], Number]}], 
         
         Button["Inizia partita", 
           (
-            If[StringMatchQ[seed, NumberString], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
+            If[!NumberQ[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
             fase = "gioco"; (* Passa alla fase di gioco *)
             letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
@@ -310,10 +288,40 @@ GeneraInterfaccia[] := DynamicModule[
         Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
         Dynamic[DisegnaImpiccato[Length[errori]]],
 		(* Mostra l'intera tastiera come colonna di righe *)
-		
-		Column[
-			Map[CreaRiga[{#[[1]], #[[2]], parola, stato, score, gamemode, errori}] &, righeTastiera], (* Applica la funzione creaRiga a ciascuna riga *)
-			Spacings -> 1 
+		Dynamic[
+			Column[
+				Map[
+					Row[
+						Join[
+							{Spacer[#[[1]]*25]}, 
+							Table[
+								With[{l = lettera}, (* Blocca il valore della lettera per ogni bottone, cos\[IGrave] non viene sovrascritto *)
+									Button[
+										l, 
+										Module[{guess = ToLowerCase[StringTrim[l]]}, (* Elimina gli spazi e converte la lettera in minuscolo *)
+											{stato, errori, score} = AggiornaStato[parola, stato, guess, score, gamemode, errori]; (* Aggiorna lo stato del gioco con la lettera scelta *)
+											messaggio = If[MemberQ[parola, guess], "Lettera corretta!", "Lettera sbagliata!"]; (* Mostra un messaggio in base al risultato della prova *)
+										], 
+										(* Disabilito il tasto se e' gia' stato premuto oppure se la partita e' finita *)
+										Enabled -> !MemberQ[Join[stato, errori], ToLowerCase[l]] &&
+											MemberQ[stato, "_"] &&
+											Length[errori] < maxErrori,
+										(* Cambio il colore al tasto premuto: verde se e' corretto, rosso se non e' corretto *)
+										Background->Which[
+											MemberQ[stato, ToLowerCase[l]], LightGreen,
+											MemberQ[errori, ToLowerCase[l]], LightRed],
+										ImageSize -> {40, 40}
+									]
+								],
+								{lettera, #[[2]]} (* Itera sulle lettere della riga *)
+							]
+						],
+						Spacer[5] 
+					] &,
+					righeTastiera
+				], (* Applica la funzione creaRiga a ciascuna riga *)
+				Spacings -> 1 
+			]
 		],
         Dynamic[
           If[
@@ -347,32 +355,11 @@ GeneraInterfaccia[] := DynamicModule[
 ];
 
 
-
 (* Si puo' giocare da qua *)
 GeneraInterfaccia[]
 
 
-{stato, errors, score} = AggiornaStato[word, stato, "a", score, gameMode, errors]
-
-
-(* ::Input:: *)
-(*AggiornaStato[word,stato,"a",score,gameMode,errors]*)
-
-
-{stato, errors, score} = Suggerimento[word, stato, errors, score, gameMode]
-
-
-(* ::Input:: *)
-(*Suggerimento[word,stato,errors,score,gameMode]*)
-
-
-
-
-
-MostraClassificaGUI[score]
-
-
-End[]
+End[];
 
 
 EndPackage[]
