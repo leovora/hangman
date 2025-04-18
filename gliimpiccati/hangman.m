@@ -41,7 +41,7 @@ Module[ { wordlist, pattern, wordlen, word, stato, errors={}, score=0 },
 	(* Imposta la lunghezza delle possibili parole in base alla difficolta' selezionata *)
 	If[ gamemode === 1, wordlen = {1,5} ];
 	If[ gamemode === 2, wordlen = {6,8} ];
-	If[ gamemode === 3, wordlen = {9,12} ];
+	If[ gamemode === 3, wordlen = {9,15} ];
 	
 	(* Recupera la lista di parole dal dizionario italiano filtrando in base alla lunghezza e i caratteri non consentiti *)
 	wordlist = Select[DictionaryLookup[{"Italian","*"}], Between[wordlen][StringLength[#]] && !HaCaratteriNonAmmessiQ[#] &];
@@ -138,7 +138,7 @@ SalvaRecord[nome_String, punteggio_Integer, file_:"score.json"] :=
 Module[{record, datiEsistenti = {}, nuovoContenuto},
   
 	(* Nuovo record come associazione *)
-	record = <|"nome" -> nome, "punteggio" -> punteggio|>;
+	record = {"nome" -> nome, "punteggio" -> punteggio};
   
 	(* Se il file esiste, prova a caricarlo *)
 	datiEsistenti = RecuperaClassifica[];
@@ -146,13 +146,16 @@ Module[{record, datiEsistenti = {}, nuovoContenuto},
 	(* Aggiungi il nuovo record *)
 	nuovoContenuto = Append[datiEsistenti, record];
 
+	(* Ordina per punteggio decrescente e prendi solo i primi 10 *)
+	nuovoContenuto = Take[Reverse@SortBy[nuovoContenuto, #[[2,2]] &], UpTo[10]];
+
 	(* Sovrascrivi il file con tutti i record *)
 	Export[file, nuovoContenuto, "JSON"];
 ];
 
 (* Funzione per caricare e ordinare la classifica *)
-RecuperaClassifica[file_: "score.json"] := 
-Module [{classifica},
+RecuperaClassifica[file_:"score.json"] := 
+Module [{classifica = {}},
 	If[FileExistsQ[file], (* Controllo l'esistenza del file *)
 	classifica = Import[file, "JSON"]; (* Se il file esiste carica i suoi dati *)
 	If[!ListQ[classifica], classifica = {}], (* Se non ci sono dati inizializza classifica come lista vuota *)
@@ -164,7 +167,7 @@ Module [{classifica},
 ];
 
 MostraClassificaGUI[score_Integer] := 
-DynamicModule[{nome = "", classifica = {}, file},
+DynamicModule[{nome = "", classifica = {}, punteggioSalvato = False, file},
 	(* Inizializza classifica *)
 	SetDirectory[NotebookDirectory[]];
 	file = "score.json";
@@ -173,25 +176,35 @@ DynamicModule[{nome = "", classifica = {}, file},
 	(* Creazione del pop-up *)
 	CreateDialog[
 		Framed[
-			Column[{
-				Style["Classifica", Bold, 16],
-				(* Creazione della tablella dei punteggi *)
-				Dynamic@Grid[
-				Prepend[
-					(* Con MapIndexed applico l'operatore di partizione a ogni elemento di classifica accedendo a nome e punteggio *)
-					MapIndexed[{#2[[1]], #[[1,2]], #[[2,2]]} &, classifica],
-					{"#", "Nome", "Punteggio"}
-					],
-					Frame -> All,
-					Alignment -> Center
-				],
-			(* Campo di inserimento del nome per il salvataggio nella classifica *)
-			"Inserisci il tuo nome:",
-			InputField[Dynamic[nome], String, FieldSize -> 20],
-			(* Bottone per salvare il punteggio della partita e aggiornare la classifica *)
-			Button["Salva Punteggio", SalvaRecord[nome, score]; classifica = RecuperaClassifica[];, Enabled -> Dynamic[StringLength[nome] > 0]]
-			}, Spacings -> 1.5],
-			
+			Dynamic[
+				Column[{
+					Style["Classifica", Bold, 16],
+					(* Creazione della tablella dei punteggi *)
+						Grid[
+							Prepend[
+								(* Con MapIndexed applico l'operatore di partizione a ogni elemento di classifica accedendo a nome e punteggio *)
+								MapIndexed[{#2[[1]], #[[1,2]], #[[2,2]]} &, classifica],
+								{"#", "Nome", "Punteggio"}
+							],
+						Frame -> All,
+						Alignment -> Center
+						],
+					
+					If[!punteggioSalvato,
+						Column[{
+	                            "Inserisci il tuo nome:",
+	                            InputField[Dynamic[nome], String, FieldSize -> 20],
+	                            Button["Salva Punteggio",
+	                                    SalvaRecord[nome, score];
+	                                    classifica = RecuperaClassifica[];
+	                                    punteggioSalvato = True,
+	                                    Enabled -> Dynamic[StringLength[nome] > 0]
+	                            ]
+	                        }],
+	                        Button["Chiudi", DialogReturn[]]
+					]
+				}, Spacings -> 1.5]
+			],
 			FrameMargins -> 20,
 			FrameStyle -> None,
 			RoundingRadius -> 10,

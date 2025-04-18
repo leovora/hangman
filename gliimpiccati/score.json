@@ -1,15 +1,11 @@
 [
 	{
-		"nome":"aaa",
-		"punteggio":160
-	},
-	{
 		"nome":"lll",
 		"punteggio":130
 	},
 	{
-		"nome":"a",
-		"punteggio":100
+		"nome":"UUU",
+		"punteggio":40
 	},
 	{
 		"nome":"sas",
@@ -20,55 +16,27 @@
 		"punteggio":40
 	},
 	{
-		"nome":"adsad",
+		"nome":"ewq",
 		"punteggio":40
 	},
 	{
-		"nome":"adsad",
-		"punteggio":40
+		"nome":"ttt",
+		"punteggio":30
 	},
 	{
-		"nome":"adsad",
-		"punteggio":40
+		"nome":"ef",
+		"punteggio":30
+	},
+	{
+		"nome":"wsx",
+		"punteggio":20
 	},
 	{
 		"nome":"cc",
 		"punteggio":20
 	},
 	{
-		"nome":"aa",
-		"punteggio":20
-	},
-	{
-		"nome":"20",
-		"punteggio":20
-	},
-	{
-		"nome":"c",
+		"nome":"rre",
 		"punteggio":10
-	},
-	{
-		"nome":"b",
-		"punteggio":10
-	},
-	{
-		"nome":"asd",
-		"punteggio":10
-	},
-	{
-		"nome":"a",
-		"punteggio":10
-	},
-	{
-		"nome":"a",
-		"punteggio":10
-	},
-	{
-		"nome":"10",
-		"punteggio":10
-	},
-	{
-		"nome":"ggggg",
-		"punteggio":-20
 	}
 ]
