@@ -245,6 +245,7 @@ righeTastiera = {
 GeneraInterfaccia[] := DynamicModule[
   {
     seed, (* Valore del seed per la generazione pseudo-casuale della parola *)
+    seedError = "",
     fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
     gamemode = 1, (* Modalit\[AGrave] di difficolt\[AGrave]: 1 = Facile, 2 = Media, 3 = Difficile *)
     parola, stato, errori, score, (* Variabili per la parola da indovinare, lo stato del gioco, gli errori e il punteggio *)
@@ -262,12 +263,23 @@ GeneraInterfaccia[] := DynamicModule[
       Column[{
         Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16],
         RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
-        
-        Row[{"Seed (opzionale): ", InputField[Dynamic[seed], Number]}], 
-        
+        (* Controllo sull'input del seed su ogni carattere inserito *)
+        Row[{"Seed (opzionale): ", InputField[
+				Dynamic[seed, ({seed, seedError} = If[StringMatchQ[#, DigitCharacter ..], {#, ""}, {seed, "\:26a0\:fe0f Inserire solo numeri naturali (0, 1, 2, ...)."}]) &],
+				String,
+				FieldHint->"Inserire un numero naturale", (* Suggerimento per il tipo di input accettato *)
+				ContinuousAction->True (* Per eseguire il controllo ad ogni input *)
+				]}], 
+		(* Messaggio di errore in caso non venga inserito un input valido *)
+        Dynamic[
+			If[seedError != "",
+				Style[seedError, Red, Italic],
+				""
+			]
+        ],
         Button["Inizia partita", 
           Module[{},
-            If[!NumberQ[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
+            If[!NumberQ[seed], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
             fase = "gioco"; (* Passa alla fase di gioco *)
             letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
@@ -284,7 +296,8 @@ GeneraInterfaccia[] := DynamicModule[
         
         Row[{
           Button["\|01f4a1Suggerimento", 
-            {stato, errori, score} = Suggerimento[parola, stato, errori, score, gamemode] (* Fornisce un suggerimento e aggiorna stato, errori e punteggio *)
+            {stato, errori, score} = Suggerimento[parola, stato, errori, score, gamemode], (* Fornisce un suggerimento e aggiorna stato, errori e punteggio *)
+			Enabled -> MemberQ[stato, "_"] && Length[errori] < maxErrori
           ],
           Spacer[20],
           Button["\|01f9fdPulisci", 
@@ -359,7 +372,7 @@ GeneraInterfaccia[] := DynamicModule[
         Button["\|01f504Nuova partita", (* Bottone per iniziare una nuova partita *)
           Module[{},
             fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
-            letteraUtente = ""; messaggio = ""; (* Resetta le variabili *)
+            letteraUtente = ""; messaggio = ""; seedError = ""; (* Resetta le variabili *)
           ]
         ]
       }]
