@@ -266,12 +266,12 @@ GeneraInterfaccia[] := DynamicModule[
         Row[{"Seed (opzionale): ", InputField[Dynamic[seed], Number]}], 
         
         Button["Inizia partita", 
-          (
+          Module[{},
             If[!NumberQ[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
             fase = "gioco"; (* Passa alla fase di gioco *)
             letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
-          ),
+          ],
           ImageSize -> Medium 
         ]
       }, Spacings -> 2], 
@@ -339,7 +339,7 @@ GeneraInterfaccia[] := DynamicModule[
         Dynamic[
           If[
             stato === parola || Length[errori] >= maxErrori, (* Se la parola \[EGrave] indovinata o sono stati raggiunti troppi errori *)
-            (
+            Module[{},
               If[!classificaMostrata,
                 classificaMostrata = True;
                 MostraClassificaGUI[score]; (* Mostra la classifica al termine del gioco *)
@@ -351,16 +351,16 @@ GeneraInterfaccia[] := DynamicModule[
                 ],
                 If[stato === parola, Green, Red], Bold 
               ]
-            ),
+            ],
             ""
           ]
         ],
 
         Button["\|01f504Nuova partita", (* Bottone per iniziare una nuova partita *)
-          (
+          Module[{},
             fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
             letteraUtente = ""; messaggio = ""; (* Resetta le variabili *)
-          )
+          ]
         ]
       }]
     ]
