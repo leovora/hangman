@@ -265,7 +265,7 @@ GeneraInterfaccia[] := DynamicModule[
         RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
         (* Controllo sull'input del seed su ogni carattere inserito *)
         Row[{"Seed (opzionale): ", InputField[
-				Dynamic[seed, ({seed, seedError} = If[StringMatchQ[#, DigitCharacter ..], {#, ""}, {seed, "\:26a0\:fe0f Inserire solo numeri naturali (0, 1, 2, ...)."}]) &],
+				Dynamic[seed, ({seed, seedError} = If[StringMatchQ[#, DigitCharacter ..] || StringMatchQ[#, ""], {#, ""}, {seed, "\:26a0\:fe0f Inserire solo numeri naturali (0, 1, 2, ...)."}]) &],
 				String,
 				FieldHint->"Inserire un numero naturale", (* Suggerimento per il tipo di input accettato *)
 				ContinuousAction->True (* Per eseguire il controllo ad ogni input *)
@@ -279,7 +279,7 @@ GeneraInterfaccia[] := DynamicModule[
         ],
         Button["Inizia partita", 
           Module[{},
-            If[StringQ[seed], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
+            If[StringQ[seed] && seed != "", seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
             fase = "gioco"; (* Passa alla fase di gioco *)
             letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
