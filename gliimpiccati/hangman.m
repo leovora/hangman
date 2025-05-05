@@ -279,7 +279,7 @@ GeneraInterfaccia[] := DynamicModule[
         ],
         Button["Inizia partita", 
           Module[{},
-            If[!NumberQ[seed], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
+            If[StringQ[seed], seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
             fase = "gioco"; (* Passa alla fase di gioco *)
             letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
