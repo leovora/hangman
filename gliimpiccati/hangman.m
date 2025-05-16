@@ -17,7 +17,7 @@ BeginPackage["HangmanGame`"];
 
 GeneraInterfaccia::usage = "GeneraInterfaccia[]
 	Funzione che permette di generare un'interfaccia interattiva e dinamica, la quale richiama
-	le altre funzionalita' del gioco.";
+	le altre funzionalit\[AGrave] del gioco.";
 
 
 Begin["`Private`"];
@@ -41,7 +41,7 @@ Module[ { wordlist, pattern, wordlen, word, stato, errors={}, score=0 },
 	word = Characters[RandomChoice[wordlist]];
 	
 	(* Inizializzazione dello stato *)
-	stato = InizializzaStato[word];
+	stato = InizializzaStato[ToLowerCase[word]];
 	
 	(* Ritorno della parola selezionata come lista di caratteri, lo stato iniziale e una lista vuota di errori *)
 	{word, stato, errors, score}
@@ -124,7 +124,6 @@ Module[{newState, newErrors, newScore},
 
 SalvaRecord[nome_String, punteggio_Integer, file_:"score.json"] := 
 Module[{record, datiEsistenti = {}, nuovoContenuto},
-  
 	(* Nuovo record come associazione *)
 	record = {"nome" -> nome, "punteggio" -> punteggio};
   
@@ -136,7 +135,7 @@ Module[{record, datiEsistenti = {}, nuovoContenuto},
 
 	(* Ordina per punteggio decrescente e prendi solo i primi 10 *)
 	nuovoContenuto = Take[Reverse@SortBy[nuovoContenuto, #[[2,2]] &], UpTo[10]];
-
+	
 	(* Sovrascrivi il file con tutti i record *)
 	Export[file, nuovoContenuto, "JSON"];
 ];
@@ -155,12 +154,11 @@ Module [{classifica = {}},
 ];
 
 MostraClassificaGUI[score_Integer] := 
-DynamicModule[{nome = "", classifica = {}, punteggioSalvato = False, file},
+DynamicModule[{nome = "", classifica = {}, punteggioSalvato = False, file = "score.json"},
 	(* Inizializza classifica *)
 	SetDirectory[NotebookDirectory[]];
-	file = "score.json";
 	classifica = RecuperaClassifica[];
-	
+
 	(* Creazione del pop-up *)
 	CreateDialog[
 		Framed[
@@ -178,16 +176,20 @@ DynamicModule[{nome = "", classifica = {}, punteggioSalvato = False, file},
 						Alignment -> Center
 						],
 					
-					If[!punteggioSalvato,
+					If[
+						!punteggioSalvato,
 						Column[{
 	                            "Inserisci il tuo nome:",
 	                            InputField[Dynamic[nome], String, FieldSize -> 20],
-	                            Button["Salva Punteggio",
-	                                    SalvaRecord[nome, score];
-	                                    classifica = RecuperaClassifica[];
-	                                    punteggioSalvato = True,
-	                                    Enabled -> Dynamic[StringLength[nome] > 0]
-	                            ]
+		                            Button[
+		                                 "Salva Punteggio",
+										Module[{nomeVal = nome},
+		                                    Print[SalvaRecord[nomeVal, score]];
+		                                    classifica = RecuperaClassifica[];
+		                                    punteggioSalvato = True;
+		                                 ],
+		                                 Enabled -> Dynamic[StringLength[nome] > 0]
+		                            ]
 	                        }],
 	                        Button["Chiudi", DialogReturn[]]
 					]
@@ -361,7 +363,7 @@ GeneraInterfaccia[] := DynamicModule[
         Button["\|01f504Nuova partita", (* Bottone per iniziare una nuova partita *)
           Module[{},
             fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
-            letteraUtente = ""; messaggio = ""; seedError = ""; (* Resetta le variabili *)
+            letteraUtente = ""; messaggio = ""; seedError = "";(* Resetta le variabili *)
           ]
         ]
       }]
