@@ -2,30 +2,18 @@
 
 (* :Title: HangmanGame *)
 (* :Context: HangmanGame` *)
-(* :Author: GS *)
+(* :Author: AN, LV, CN *)
 (* :Summary: funzioni utilizzate nell'interfaccia hangman.nb *)
-(* :Copyright: GS 2025 *)
+(* :Copyright: AN, LV, CN 2025 *)
 (* :Package Version: 3 *)
 (* :Mathematica Version: 14 *)
-(* :History: last modified 07/04/2025 *)
+(* :History: last modified 17/05/2025 *)
 (* :Sources: bblio *)
 (* :Limitations: educational purposes *)
 (* :Discussion: *)
 (* :Requirements: *)
-(* :Warning: DOCUMENTATE TUTTO il codice *)
 
 BeginPackage["HangmanGame`"];
-
-GeneraEsercizio::usage = "La funzionalit\[AGrave] Genera Esercizio prevede un generatore casuale di un numero potenzialmente infinito di
-esercizi. Date all\[CloseCurlyQuote]utente la possibilit\[AGrave] di generare un esercizio e/o rigenerare l\[CloseCurlyQuote]ultimo esercizio corrente, chiedendo un
-numero (Seed), ad esempio tramite finestra di input o checkbox.";
-
-MostraSoluzione::usage = "La funzionalit\[AGrave] Mostra Soluzione pu\[OGrave] essere resa disponibile anche tramite finestra di pop-up.";
-
-Suggerimento::usage = "La funzionalit\[AGrave] Verifica Risultato serve ad aiutare l\[CloseCurlyQuote]utente ad uscire da una eventuale impasse.";
-
-Pulisci::usage = "La funzionalit\[AGrave] Pulisci riporta l\[CloseCurlyQuote]interfaccia allo stato iniziale, ripulendo anche eventuali celle create (ad
-esempio, da Mostra Soluzione e/o Verfica Risultato) durante l\[CloseCurlyQuote]uso della interfaccia stessa";
 
 GeneraInterfaccia::usage = "GeneraInterfaccia[]
 	Funzione che permette di generare un'interfaccia interattiva e dinamica, la quale richiama
@@ -69,7 +57,7 @@ Module[{stringa},
 	(* Messaggio da mostrare all'utente attraverso un pop-up *)
 	MessageDialog[
 		Panel[
-			Row[{"La parola da indovinare \[EGrave]: ", Style[stringa, Bold]}],
+			Row[{"La parola da indovinare era: ", Style[stringa, Bold]}],
 			Alignment -> Center
 		]
 	]
@@ -245,7 +233,7 @@ righeTastiera = {
 GeneraInterfaccia[] := DynamicModule[
   {
     seed, (* Valore del seed per la generazione pseudo-casuale della parola *)
-    seedError = "",
+    seedError = "", (* Variabile per memorizzare il messaggio di errore del seed *)
     fase = "selezione", (* Fase corrente del gioco: "selezione" o "gioco" *)
     gamemode = 1, (* Modalit\[AGrave] di difficolt\[AGrave]: 1 = Facile, 2 = Media, 3 = Difficile *)
     parola, stato, errori, score, (* Variabili per la parola da indovinare, lo stato del gioco, gli errori e il punteggio *)
@@ -256,28 +244,28 @@ GeneraInterfaccia[] := DynamicModule[
   },
 
   Dynamic[
-	(* Switch per determinare quale parte dell'interfaccia mostrare in base alla fase del gioco *)
-    Switch[fase, 
+	
+    Switch[fase, (* Switch per determinare quale parte dell'interfaccia mostrare in base alla fase del gioco *)
 
       "selezione", (* Fase di selezione della difficolt\[AGrave] e del seed *)
       Column[{
-        Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16],
-        RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}],
+        Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16], , (* Titolo della sezione di selezione *)
+        RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}], (*Selezione difficolt\[AGrave]*)
         (* Controllo sull'input del seed su ogni carattere inserito *)
         Row[{"Seed (opzionale): ", InputField[
-				Dynamic[seed, ({seed, seedError} = If[StringMatchQ[#, DigitCharacter ..] || StringMatchQ[#, ""], {#, ""}, {seed, "\:26a0\:fe0f Inserire solo numeri naturali (0, 1, 2, ...)."}]) &],
-				String,
+				Dynamic[seed, ({seed, seedError} = If[StringMatchQ[#, DigitCharacter ..] || StringMatchQ[#, ""], {#, ""}, {seed, "\:26a0\:fe0f Inserire solo numeri naturali (0, 1, 2, ...)."}]) &],  (* Controllo dinamico del seed inserito *)
+				String, (* Tipo di input: stringa *)
 				FieldHint->"Inserire un numero naturale", (* Suggerimento per il tipo di input accettato *)
 				ContinuousAction->True (* Per eseguire il controllo ad ogni input *)
 				]}], 
 		(* Messaggio di errore in caso non venga inserito un input valido *)
         Dynamic[
 			If[seedError != "",
-				Style[seedError, Red, Italic],
-				""
+				Style[seedError, Red, Italic], (* Mostra il messaggio di errore in rosso *)
+				"" (* Nessun messaggio se il seed \[EGrave] corretto *)
 			]
         ],
-        Button["Inizia partita", 
+        Button["Inizia partita", (*Pulsante per iniziare la partita*)
           Module[{},
             If[StringQ[seed] && seed != "", seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
             {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
@@ -299,20 +287,17 @@ GeneraInterfaccia[] := DynamicModule[
             {stato, errori, score} = Suggerimento[parola, stato, errori, score, gamemode], (* Fornisce un suggerimento e aggiorna stato, errori e punteggio *)
 			Enabled -> MemberQ[stato, "_"] && Length[errori] < maxErrori
           ],
-          Spacer[20],
-          Button["\|01f9fdPulisci", 
-            {stato, errori, score} = Pulisci[parola] (* Resetta lo stato del gioco con la funzione Pulisci *)
-          ],
           Spacer[20], 
           Button["\|01f50eMostra soluzione",
-            MostraSoluzione[parola] (* Mostra la soluzione *)
-          ]
+           MostraSoluzione[parola] (* Fornisce la soluzione e termina la partita *)
+           {stato = parola, fase = "selezione", letteraUtente = ""; messaggio = ""; seedError = ""}
+           ]
         }],
 
         Dynamic[Row[{"Lettere sbagliate: ", StringJoin[Riffle[errori, ", "]]}]], (* Visualizza le lettere sbagliate provate dall'utente *)
         Dynamic[Row[{"Errori: ", Length[errori], "/", maxErrori}]], (* Mostra il numero di errori *)
         Dynamic[Style[messaggio, Blue]], (* Visualizza il messaggio di feedback (corretto/sbagliato) *)
-        Dynamic[DisegnaImpiccato[Length[errori]]],
+        Dynamic[DisegnaImpiccato[Length[errori]]], (*Disegna l'impiccato con l'attuale numero di errori*)
 		(* Mostra l'intera tastiera come colonna di righe *)
 		Dynamic[
 			Column[
@@ -350,25 +335,29 @@ GeneraInterfaccia[] := DynamicModule[
 			]
 		],
         Dynamic[
-          If[
+        If[
             stato === parola || Length[errori] >= maxErrori, (* Se la parola \[EGrave] indovinata o sono stati raggiunti troppi errori *)
-            Module[{},
-              If[!classificaMostrata,
-                classificaMostrata = True;
-                MostraClassificaGUI[score]; (* Mostra la classifica al termine del gioco *)
-              ];
-              Style[
-                If[stato === parola,
-                  "Hai vinto!", (* Se la parola \[EGrave] indovinata, mostra il messaggio di vittoria *)
-                  "Hai perso! La parola era: " <> StringJoin[parola] (* Altrimenti, mostra la parola corretta e il messaggio di sconfitta *)
-                ],
-                If[stato === parola, Green, Red], Bold 
+            Column[{
+              Module[{},
+                If[!classificaMostrata, (* Controlla se la classifica \[EGrave] gi\[AGrave] stata mostrata *)
+                  classificaMostrata = True;
+                  MostraClassificaGUI[score]; (* Mostra la classifica al termine del gioco *)
+                ];        
+                Style[
+                  If[stato === parola, (* Messaggio finale in base all'esito della partita *)
+                    "Hai vinto!", (* Se la parola \[EGrave] indovinata, mostra il messaggio di vittoria *)
+                    "Hai perso! La parola era: " <> StringJoin[parola] (* Altrimenti, mostra la parola corretta e il messaggio di sconfitta *)
+                  ],
+                  If[stato === parola, Green, Red], Bold (*Imposta lo stile della scritta*)
+                ]        
+              ],
+              Button["\|01f9fdPulisci",
+                {stato, errori, score} = Pulisci[parola] (* Resetta lo stato del gioco con la funzione Pulisci *)
               ]
-            ],
-            ""
+            }],
+            ""        
           ]
         ],
-
         Button["\|01f504Nuova partita", (* Bottone per iniziare una nuova partita *)
           Module[{},
             fase = "selezione"; (* Torna alla fase di selezione per una nuova partita *)
@@ -379,10 +368,6 @@ GeneraInterfaccia[] := DynamicModule[
     ]
   ]
 ];
-
-
-(* Si puo' giocare da qua *)
-GeneraInterfaccia[]
 
 
 End[];
