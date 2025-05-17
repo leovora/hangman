@@ -251,7 +251,7 @@ GeneraInterfaccia[] := DynamicModule[
 
       "selezione", (* Fase di selezione della difficolt\[AGrave] e del seed *)
       Column[{
-        Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16], , (* Titolo della sezione di selezione *)
+        Style["\|01f3afSeleziona la difficolt\[AGrave]", Bold, 16],  (* Titolo della sezione di selezione *)
         RadioButtonBar[Dynamic[gamemode], {1 -> "Facile", 2 -> "Media", 3 -> "Difficile"}], (*Selezione difficolt\[AGrave]*)
         (* Controllo sull'input del seed su ogni carattere inserito *)
         Row[{"Seed (opzionale): ", InputField[
