@@ -307,14 +307,15 @@ GeneraInterfaccia[] := DynamicModule[
 				"" (* Nessun messaggio se il seed \[EGrave] corretto *)
 			]
         ],
-        Button["Inizia partita", (*Pulsante per iniziare la partita*)
+        Button["Inizia partita", (* Pulsante per iniziare la partita *)
           Module[{},
             If[StringQ[seed] && seed != "", seed = ToExpression[seed], seed = Automatic]; (* Verifica e converte il seed in numero, altrimenti lascia Automatic *)
-            {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Chiamata alla funzione GeneraEsercizio per generare la parola, stato iniziale, errori e punteggio *)
-            fase = "gioco"; (* Passa alla fase di gioco *)
-            letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta le variabili per la partita *)
+            {parola, stato, errori, score} = GeneraEsercizio[gamemode, seed]; (* Genera esercizio *)
+            fase = "gioco"; (* Cambia la fase *)
+            letteraUtente = ""; messaggio = ""; classificaMostrata = False; (* Resetta variabili *)
           ],
-          ImageSize -> Medium 
+          ImageSize -> {200, 60}, (* Dimensione grande del bottone *)
+          BaseStyle -> {FontSize -> 16, Bold} (* Testo pi\[UGrave] grande e in grassetto *)
         ]
       }, Spacings -> 2], 
 
